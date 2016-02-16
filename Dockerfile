@@ -53,12 +53,13 @@ VOLUME /u01/app/oracle/data
 
 
 COPY docker-entrypoint.sh /
-ENTRYPOINT [ "/docker-entrypoint.sh" ]
-CMD [ "oracle-xe" ]
 
 ONBUILD RUN echo "ORACLE_LISTENER_PORT=1521" > /tmp/XE.rsp \
 	        && echo "ORACLE_HTTP_PORT=8080" >> /tmp/XE.rsp \
 	        && echo "ORACLE_PASSWORD=${ORACLE_PASSWORD-manager}" >> /tmp/XE.rsp \
 	        && echo "ORACLE_CONFIRM_PASSWORD=${ORACLE_PASSWORD-manager}" >> /tmp/XE.rsp \
 	        && echo "ORACLE_DBENABLE=y" >> /tmp/XE.rsp \
-          && /etc/init.d/oracle-xe configure responseFile=/setup/XE.rsp
+          && /etc/init.d/oracle-xe configure responseFile=/tmp/XE.rsp
+
+ENTRYPOINT [ "/docker-entrypoint.sh" ]
+CMD [ "oracle-xe" ]
