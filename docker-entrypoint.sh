@@ -1,7 +1,6 @@
 #!/bin/bash
 if [ "$1" = 'oracle-xe' ]; then
-  ls -ld $ORACLE_HOME/config/seeddb
-  if [ -d "$ORACLE_HOME/config/seeddb" ]; then
+  if [ -d "$DATADIR/oradata" ]; then
     echo "Setting up Oracle"
 
     cp /post-setup/*.ora $ORACLE_HOME/config/scripts
@@ -12,7 +11,7 @@ if [ "$1" = 'oracle-xe' ]; then
   	echo "ORACLE_DBENABLE=y" >> $ORACLE_HOME/config/XE.rsp
 
     #volumes
-    chown -R oracle:dba /u01/app/oracle
+    chown -R oracle:dba /var/lib/oracle
 
     /etc/init.d/oracle-xe configure responseFile=$ORACLE_HOME/config/XE.rsp
     for f in /docker-entrypoint-initdb.d/*; do

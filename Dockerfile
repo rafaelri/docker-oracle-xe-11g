@@ -34,18 +34,32 @@ ENV LSNR=$ORACLE_HOME/bin/lsnrctl
 ENV ORACLE_SID=XE
 ENV LISTENERS_ORA=$ORACLE_HOME/network/admin/listener.ora
 ENV TEMPLATE_LISTENERS_ORA=$LISTENERS_ORA.tmpl
-RUN ln -s /u01/app/oracle/product/11.2.0/xe/config/oracle-xe /etc/default/oracle-xe \
+ENV DATADIR=/var/lib/oracle
+
+RUN mkdir $DATADIR \
+  && mkdir -p $DATADIR/admin \
+	&& mkdir -p $DATADIR/diag \
+	&& mkdir -p $DATADIR/fast_recovery_area \
+	&& mkdir -p $DATADIR/oradata \
+	&& mkdir -p $DATADIR/oradiag_oracle \
+	&& mkdir -p $DATADIR/product/11.2.0/xe/dbs \
+	&& mkdir -p $DATADIR/product/11.2.0/xe/log \
+	&& mkdir -p $DATADIR/product/11.2.0/xe/network \
+  && mkdir -p $DATADIR/product/11.2.0/xe/network \
+	&& chown -R oracle:dba /var/lib/oracle \
+  && ln -s $DATADIR/admin /u01/app/oracle/admin \
+  && ln -s $DATADIR/oracle-xe /etc/default/oracle-xe \
+  && ln -s $DATADIR/diag /u01/app/oracle/diag \
+  && ln -s $DATADIR/fast_recovery_area /u01/app/oracle/fast_recovery_area \
+  && ln -s $DATADIR/oradata /u01/app/oracle/oradata \
+  && ln -s $DATADIR/oradiag_oracle /u01/app/oracle/oradiag_oracle \
+  && ln -s $DATADIR/product/11.2.0/xe/dbs /u01/app/oracle/product/11.2.0/xe/dbs \
+  && ln -s $DATADIR/product/11.2.0/xe/log /u01/app/oracle/product/11.2.0/xe/log \
+  && ln -s $DATADIR/product/11.2.0/xe/network/admin /u01/app/oracle/product/11.2.0/xe/network/admin \
+  && ln -s $DATADIR/product/11.2.0/xe/config /u01/app/oracle/product/11.2.0/xe/config \
   && cp $LISTENERS_ORA $TEMPLATE_LISTENERS_ORA
 
-VOLUME /u01/app/oracle/admin
-VOLUME /u01/app/oracle/diag
-VOLUME /u01/app/oracle/fast_recovery_area
-VOLUME /u01/app/oracle/oradata
-VOLUME /u01/app/oracle/oradiag_oracle
-VOLUME /u01/app/oracle/product/11.2.0/xe/dbs
-VOLUME /u01/app/oracle/product/11.2.0/xe/log
-VOLUME /u01/app/oracle/product/11.2.0/xe/network/admin
-VOLUME /u01/app/oracle/product/11.2.0/xe/config
+VOLUME $DATADIR
 
 COPY docker-entrypoint.sh /
 
