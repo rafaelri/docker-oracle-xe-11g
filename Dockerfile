@@ -30,21 +30,20 @@ ENV ORACLE_HOME=$ORACLE_BASE/product/11.2.0/xe
 ENV SQLPLUS=$ORACLE_HOME/bin/sqlplus
 ENV LSNR=$ORACLE_HOME/bin/lsnrctl
 ENV ORACLE_SID=XE
-ENV DATA_DIR=/var/lib/oracle
 ENV LISTENERS_ORA=$ORACLE_HOME/network/admin/listener.ora
 
-RUN cp /setup/etc-default-oracle-xe /etc/default/oracle-xe \
-  && sed -i "s|/u01/app/oracle/admin|/var/lib/oracle/admin|g" $ORACLE_HOME/config/scripts/XE.sh \
-  && sed -i "s|/u01/app/oracle/fast_recovery_area|/var/lib/oracle/fast_recovery_area|g" $ORACLE_HOME/config/scripts/XE.sh \
-  && sed -i "s|/u01/app/oracle/oradata|/var/lib/oracle/oradata|g" "$ORACLE_HOME/config/scripts/XE.sh" \
-  && sed -i "s|/u01/app/oracle/oradata|/var/lib/oracle/oradata|g" "$ORACLE_HOME/config/scripts/rmanRestoreDatafiles.sql" \
-  && sed -i "s|/u01/app/oracle/oradata|/var/lib/oracle/oradata|g" "$ORACLE_HOME/config/scripts/cloneDBCreation.sql" \
-  && mkdir -p /u01/app/oracle/product/11.2.0/xe/log] [/u01/app/oracle/product/11.2.0/xe/log/diag/clients \
-  && chown -R oracle:dba /u01/app/oracle/product/11.2.0/xe/log] [/u01/app/oracle/product/11.2.0/xe/log \
-  && cp /setup/*.ora /u01/app/oracle/product/11.2.0/xe/config/scripts \
-  && mkdir $DATA_DIR
+RUN cp /setup/*.ora /u01/app/oracle/product/11.2.0/xe/config/scripts \
+  && /etc/init.d/oracle-xe configure responseFile=/setup/XE.rsp
 
-VOLUME $DATA_DIR
+VOLUME /u01/app/oracle/admin
+VOLUME /u01/app/oracle/diag
+VOLUME /u01/app/oracle/fast_recovery_area
+VOLUME /u01/app/oracle/oradata
+VOLUME /u01/app/oracle/oradiag_oracle
+VOLUME /u01/app/oracle/product/11.2.0/xe/dbs
+VOLUME /u01/app/oracle/product/11.2.0/xe/log
+VOLUME /u01/app/oracle/product/11.2.0/xe/network/admin
+VOLUME /u01/app/oracle/product/11.2.0/xe/config
 
 COPY docker-entrypoint.sh /
 
