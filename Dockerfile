@@ -5,14 +5,7 @@ MAINTAINER Rafael Ribeiro <rafaelri@gmail.com>
 EXPOSE 1521
 EXPOSE 8080
 
-ENV ORACLE_BASE=/u01/app/oracle
-ENV ORACLE_HOME=$ORACLE_BASE/product/11.2.0/xe
-ENV SQLPLUS=$ORACLE_HOME/bin/sqlplus
-ENV ORACLE_SID=XE
-
 ENV DEBIAN_FRONTEND=noninteractive
-
-ENV DATA_DIR=$ORACLE_BASE/data
 
 ADD setup /setup
 
@@ -32,11 +25,26 @@ RUN apt-get install -y libaio1 net-tools bc curl \
   && apt-get remove -y --purge curl libcurl3 ca-certificates \
   && apt-get clean
 
-RUN cp /setup/init.ora /u01/app/oracle/product/11.2.0/xe/config/scripts \
-  && cp /setup/initXETemp.ora /u01/app/oracle/product/11.2.0/xe/config/scripts
+ENV ORACLE_BASE=/u01/app/oracle
+ENV ORACLE_HOME=$ORACLE_BASE/product/11.2.0/xe
+ENV SQLPLUS=$ORACLE_HOME/bin/sqlplus
+ENV LSNR=$ORACLE_HOME/bin/lsnrctl
+ENV ORACLE_SID=XE
+ENV DATA_DIR=/var/lib/oracle
+ENV LISTENERS_ORA=$ORACLE_HOME/network/admin/listener.ora
 
-VOLUME /u01/app/oracle/data
+RUN cp /setup/etc-default-oracle-xe /etc/default/oracle-xe \
+  && sed -i "s|/u01/app/oracle/admin|/var/lib/oracle/admin|g" $ORACLE_HOME/config/scripts/XE.sh \
+  && sed -i "s|/u01/app/oracle/fast_recovery_area|/var/lib/oracle/fast_recovery_area|g" $ORACLE_HOME/config/scripts/XE.sh \
+  && sed -i "s|/u01/app/oracle/oradata|/var/lib/oracle/oradata|g" "$ORACLE_HOME/config/scripts/XE.sh" \
+  && sed -i "s|/u01/app/oracle/oradata|/var/lib/oracle/oradata|g" "$ORACLE_HOME/config/scripts/rmanRestoreDatafiles.sql" \
+  && sed -i "s|/u01/app/oracle/oradata|/var/lib/oracle/oradata|g" "$ORACLE_HOME/config/scripts/cloneDBCreation.sql" \
+  && mkdir -p /u01/app/oracle/product/11.2.0/xe/log] [/u01/app/oracle/product/11.2.0/xe/log/diag/clients \
+  && chown -R oracle:dba /u01/app/oracle/product/11.2.0/xe/log] [/u01/app/oracle/product/11.2.0/xe/log \
+  && cp /setup/*.ora /u01/app/oracle/product/11.2.0/xe/config/scripts \
+  && mkdir $DATA_DIR
 
+VOLUME $DATA_DIR
 
 COPY docker-entrypoint.sh /
 
