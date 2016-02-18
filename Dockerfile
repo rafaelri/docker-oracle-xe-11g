@@ -25,15 +25,17 @@ RUN apt-get install -y libaio1 net-tools bc curl \
   && apt-get remove -y --purge curl libcurl3 ca-certificates \
   && apt-get clean
 
+ADD post-setup /post-setup
+
 ENV ORACLE_BASE=/u01/app/oracle
 ENV ORACLE_HOME=$ORACLE_BASE/product/11.2.0/xe
 ENV SQLPLUS=$ORACLE_HOME/bin/sqlplus
 ENV LSNR=$ORACLE_HOME/bin/lsnrctl
 ENV ORACLE_SID=XE
 ENV LISTENERS_ORA=$ORACLE_HOME/network/admin/listener.ora
-
-RUN cp /setup/*.ora /u01/app/oracle/product/11.2.0/xe/config/scripts \
-  && /etc/init.d/oracle-xe configure responseFile=/setup/XE.rsp
+ENV TEMPLATE_LISTENERS_ORA=$LISTENERS_ORA.tmpl
+RUN ln -s /u01/app/oracle/product/11.2.0/xe/config/oracle-xe /etc/default/oracle-xe \
+  && cp $LISTENERS_ORA $TEMPLATE_LISTENERS_ORA
 
 VOLUME /u01/app/oracle/admin
 VOLUME /u01/app/oracle/diag

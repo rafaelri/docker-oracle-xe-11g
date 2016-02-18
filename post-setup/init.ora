@@ -15,22 +15,25 @@ db_name=XE
 ###########################################
 # File Configuration
 ###########################################
-control_files=("/var/lib/oracle/oradata/XE/control.dbf")
+control_files=("/u01/app/oracle/oradata/XE/control.dbf")
+DB_RECOVERY_FILE_DEST=/u01/app/oracle/fast_recovery_area
 DB_RECOVERY_FILE_DEST_SIZE=10G
-DB_RECOVERY_FILE_DEST=/var/lib/oracle/fast_recovery_area
 
 ###########################################
 # Job Queues
 ###########################################
+job_queue_processes=4
 
 ###########################################
 # Miscellaneous
 ###########################################
 compatible=11.2.0.0.0
-diagnostic_dest=/var/lib/oracle
+diagnostic_dest=/u01/app/oracle
+#memory_target=1073741824
 #memory_target=1073741824
 pga_aggregate_target=200540160
 sga_target=601620480
+
 
 ###########################################
 # Sessions
@@ -40,17 +43,17 @@ sessions=20
 ###########################################
 # Security and Auditing
 ###########################################
-audit_file_dest=/var/lib/oracle/admin/XE/adump
+audit_file_dest=/u01/app/oracle/admin/XE/adump
 remote_login_passwordfile=EXCLUSIVE
 
 ###########################################
 # Shared Server
 ###########################################
 dispatchers="(PROTOCOL=TCP) (SERVICE=XEXDB)"
+shared_servers=4
 
 ###########################################
 # System Managed Undo and Rollback Segments
 ###########################################
 undo_management=AUTO
 undo_tablespace=UNDOTBS1
-_no_recovery_through_resetlogs=true

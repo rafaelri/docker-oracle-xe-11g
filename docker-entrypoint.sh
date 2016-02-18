@@ -1,14 +1,20 @@
 #!/bin/bash
 if [ "$1" = 'oracle-xe' ]; then
-  sed -i "s/%hostname%/$HOSTNAME/g" "$LISTENERS_ORA"
-  sed -i "s/%port%/1521/g" "$LISTENERS_ORA"
-  if [ ! -f $DATA_DIR/oradata ]; then
+  ls -ld $ORACLE_HOME/config/seeddb
+  if [ -d "$ORACLE_HOME/config/seeddb" ]; then
     echo "Setting up Oracle"
 
-    su -s /bin/bash oracle "$ORACLE_HOME/config/scripts/XE.sh" > /dev/null 2>&1
-    echo  alter user sys identified by \"$ORACLE_PASSWORD\"\; | su -s /bin/bash oracle -c "$SQLPLUS -s / as sysdba"
-    echo  alter user system identified by \"$ORACLE_PASSWORD\"\; | su -s /bin/bash oracle -c "$SQLPLUS -s / as sysdba"
-    echo @$ORACLE_HOME/apex/apxxepwd.sql \"$ORACLE_PASSWORD\"\; | su -s /bin/bash oracle -c "$SQLPLUS -s / as sysdba"
+    cp /post-setup/*.ora $ORACLE_HOME/config/scripts
+    echo "ORACLE_LISTENER_PORT=1521" > $ORACLE_HOME/config/XE.rsp
+  	echo "ORACLE_HTTP_PORT=8080" >> $ORACLE_HOME/config/XE.rsp
+  	echo "ORACLE_PASSWORD=${ORACLE_PASSWORD-manager}" >> $ORACLE_HOME/config/XE.rsp
+  	echo "ORACLE_CONFIRM_PASSWORD=${ORACLE_PASSWORD-manager}" >> $ORACLE_HOME/config/XE.rsp
+  	echo "ORACLE_DBENABLE=y" >> $ORACLE_HOME/config/XE.rsp
+
+    #volumes
+    chown -R oracle:dba /u01/app/oracle
+
+    /etc/init.d/oracle-xe configure responseFile=$ORACLE_HOME/config/XE.rsp
     for f in /docker-entrypoint-initdb.d/*; do
   			case "$f" in
   				*.sh)     echo "$0: running $f"; . "$f" ;;
@@ -20,12 +26,11 @@ if [ "$1" = 'oracle-xe' ]; then
   		done
   fi
   echo "Starting Oracle"
-  su -s /bin/bash oracle -c "$LSNR start"
-  su -s /bin/bash oracle -c "$SQLPLUS -s /nolog @$ORACLE_HOME/config/scripts/startdb.sql"
+  cat $TEMPLATE_LISTENERS_ORA | sed "s/%hostname%/$HOSTNAME/g" | sed "s/%port%/1521/g" > $LISTENERS_ORA
+  service oracle-xe start
   tail -f `find /u01 -name listener.log` &
   PIDTAIL="$!"
-  trap "echo 'Stopping Oracle' && su -s /bin/bash oracle -c \"$SQLPLUS -s /nolog @$ORACLE_HOME/config/scripts/stopdb.sql\" \
-         su -s /bin/bash oracle -c \"$LSNR stop\" && kill $PIDTAIL" exit INT TERM
+  trap "echo 'Stopping Oracle' && service oracle-xe stop && kill $PIDTAIL" exit INT TERM
   wait
 else
   exec "$@"
