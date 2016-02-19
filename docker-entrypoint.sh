@@ -5,7 +5,7 @@ if [ "$1" = 'oracle-xe' ]; then
 
     mkdir -p $DATADIR/admin \
     && mkdir -p $DATADIR/product/11.2.0/xe/ \
-    && mkdir $DATADIR/product/11.2.0/xe/log \
+    && mkdir -p $DATADIR/product/11.2.0/xe/log/diag/clients \
     && mkdir $DATADIR/product/11.2.0/xe/network \
   	&& mkdir -p $DATADIR/diag \
   	&& mkdir -p $DATADIR/fast_recovery_area \
