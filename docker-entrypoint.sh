@@ -1,19 +1,31 @@
 #!/bin/bash
 if [ "$1" = 'oracle-xe' ]; then
-  if [ -d "$DATADIR/oradata" ]; then
+  if [ ! -d "$DATADIR/oradata" ]; then
     echo "Setting up Oracle"
 
-    cp /post-setup/*.ora $ORACLE_HOME/config/scripts
-    echo "ORACLE_LISTENER_PORT=1521" > $ORACLE_HOME/config/XE.rsp
-  	echo "ORACLE_HTTP_PORT=8080" >> $ORACLE_HOME/config/XE.rsp
-  	echo "ORACLE_PASSWORD=${ORACLE_PASSWORD-manager}" >> $ORACLE_HOME/config/XE.rsp
-  	echo "ORACLE_CONFIRM_PASSWORD=${ORACLE_PASSWORD-manager}" >> $ORACLE_HOME/config/XE.rsp
-  	echo "ORACLE_DBENABLE=y" >> $ORACLE_HOME/config/XE.rsp
+    mkdir -p $DATADIR/admin \
+    && mkdir -p $DATADIR/product/11.2.0/xe/ \
+    && mkdir $DATADIR/product/11.2.0/xe/log \
+    && mkdir $DATADIR/product/11.2.0/xe/network \
+  	&& mkdir -p $DATADIR/diag \
+  	&& mkdir -p $DATADIR/fast_recovery_area \
+  	&& mkdir -p $DATADIR/oradata \
+  	&& mkdir -p $DATADIR/oradiag_oracle \
+    && cp -r $HOME_TEMPLATEDIR/config $HOME_DATADIR/config \
+    && cp -r $HOME_TEMPLATEDIR/dbs $HOME_DATADIR/dbs  \
+    && cp -r $HOME_TEMPLATEDIR/network/admin $HOME_DATADIR/network/admin \
+    && chown -R oracle:dba /var/lib/oracle
 
-    #volumes
-    chown -R oracle:dba /var/lib/oracle
+    su -s /bin/bash oracle -c "$ORACLE_HOME/config/scripts/XE.sh"
+    echo  alter user sys identified by \"$ORACLE_PASSWORD\"\; | su -s /bin/bash oracle -c "$SQLPLUS -s / as sysdba" > /dev/null 2>&1
+    echo  alter user system identified by \"$ORACLE_PASSWORD\"\; | su -s /bin/bash oracle -c "$SQLPLUS -s / as sysdba" > /dev/null 2>&1
+    echo @$ORACLE_HOME/apex/apxxepwd.sql \"$ORACLE_PASSWORD\"\; | su -s /bin/bash oracle -c "$SQLPLUS -s / as sysdba" > /dev/null 2>&1
+    chmod 750 /u01/app/oracle/oradata
+    chmod -R 775 /u01/app/oracle/diag
+    echo "XE:$ORACLE_HOME:N" >> /etc/oratab
+    chown oracle:dba /etc/oratab
+    chmod 664 /etc/oratab
 
-    /etc/init.d/oracle-xe configure responseFile=$ORACLE_HOME/config/XE.rsp
     for f in /docker-entrypoint-initdb.d/*; do
   			case "$f" in
   				*.sh)     echo "$0: running $f"; . "$f" ;;

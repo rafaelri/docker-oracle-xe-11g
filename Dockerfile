@@ -34,30 +34,32 @@ ENV LSNR=$ORACLE_HOME/bin/lsnrctl
 ENV ORACLE_SID=XE
 ENV LISTENERS_ORA=$ORACLE_HOME/network/admin/listener.ora
 ENV TEMPLATE_LISTENERS_ORA=$LISTENERS_ORA.tmpl
+ENV TEMPLATEDIR=/u01/template/oracle
+ENV HOME_TEMPLATEDIR=$TEMPLATEDIR/product/11.2.0/xe
 ENV DATADIR=/var/lib/oracle
+ENV HOME_DATADIR=$DATADIR/product/11.2.0/xe
 
 RUN mkdir $DATADIR \
-  && mkdir -p $DATADIR/admin \
-	&& mkdir -p $DATADIR/diag \
-	&& mkdir -p $DATADIR/fast_recovery_area \
-	&& mkdir -p $DATADIR/oradata \
-	&& mkdir -p $DATADIR/oradiag_oracle \
-	&& mkdir -p $DATADIR/product/11.2.0/xe/dbs \
-	&& mkdir -p $DATADIR/product/11.2.0/xe/log \
-	&& mkdir -p $DATADIR/product/11.2.0/xe/network \
-  && mkdir -p $DATADIR/product/11.2.0/xe/network \
-	&& chown -R oracle:dba /var/lib/oracle \
-  && ln -s $DATADIR/admin /u01/app/oracle/admin \
-  && ln -s $DATADIR/oracle-xe /etc/default/oracle-xe \
-  && ln -s $DATADIR/diag /u01/app/oracle/diag \
-  && ln -s $DATADIR/fast_recovery_area /u01/app/oracle/fast_recovery_area \
-  && ln -s $DATADIR/oradata /u01/app/oracle/oradata \
-  && ln -s $DATADIR/oradiag_oracle /u01/app/oracle/oradiag_oracle \
-  && ln -s $DATADIR/product/11.2.0/xe/dbs /u01/app/oracle/product/11.2.0/xe/dbs \
-  && ln -s $DATADIR/product/11.2.0/xe/log /u01/app/oracle/product/11.2.0/xe/log \
-  && ln -s $DATADIR/product/11.2.0/xe/network/admin /u01/app/oracle/product/11.2.0/xe/network/admin \
-  && ln -s $DATADIR/product/11.2.0/xe/config /u01/app/oracle/product/11.2.0/xe/config \
-  && cp $LISTENERS_ORA $TEMPLATE_LISTENERS_ORA
+  && mkdir -p $HOME_TEMPLATEDIR \
+  && cp $LISTENERS_ORA $TEMPLATE_LISTENERS_ORA \
+  && mkdir -p $DATADIR/etc/default \
+  && cp /post-setup/etc-oratab /etc/oratab \
+  && cp /post-setup/etc-default-oracle-xe /etc/default/oracle-xe \
+  && cp /post-setup/*.ora $ORACLE_HOME/config/scripts \
+  && mv $ORACLE_HOME/config $HOME_TEMPLATEDIR/config \
+  && mv $ORACLE_HOME/dbs $HOME_TEMPLATEDIR/dbs \
+  && mkdir $HOME_TEMPLATEDIR/network \
+  && mv $ORACLE_HOME/network/admin $HOME_TEMPLATEDIR/network/admin \
+  && ln -s $HOME_DATADIR/config $ORACLE_HOME/config \
+  && ln -s $HOME_DATADIR/dbs $ORACLE_HOME/dbs \
+  && ln -s $HOME_DATADIR/log $ORACLE_HOME/log \
+  && ln -s $HOME_DATADIR/network/admin $ORACLE_HOME/network/admin \
+  && ln -s $DATADIR/admin $ORACLE_BASE/admin \
+  && ln -s $DATADIR/diag $ORACLE_BASE/diag \
+  && ln -s $DATADIR/fast_recovery_area $ORACLE_BASE/fast_recovery_area \
+  && ln -s $DATADIR/oradata $ORACLE_BASE/oradata \
+  && ln -s $DATADIR/oradiag_oracle $ORACLE_HOME/oradiag_oracle \
+  && chown -R oracle:dba /var/lib/oracle
 
 VOLUME $DATADIR
 
