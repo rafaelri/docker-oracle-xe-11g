@@ -8,7 +8,7 @@ Slimmed down oracle-xe installation image that sets up database upon first start
 
 ### Installation
 ```
-docker pull rafaelri/oracle-xe-11g
+docker pull rafaelri/docker-oracle-xe-11g
 ```
 
 Run exposing ports 8080 and 1521 and with /var/lib/oracle volume for storing data:
@@ -25,7 +25,7 @@ username: system
 password: $ORACLE_PASSWORD
 ```
 
-Environment variable for replacing system password:
+Environment variable for replacing system password (defaults to manager):
 ```
 ORACLE_PASSWORD
 ```

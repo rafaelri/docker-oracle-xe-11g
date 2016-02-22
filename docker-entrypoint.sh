@@ -17,9 +17,9 @@ if [ "$1" = 'oracle-xe' ]; then
     && chown -R oracle:dba /var/lib/oracle
 
     su -s /bin/bash oracle -c "$ORACLE_HOME/config/scripts/XE.sh"
-    echo  alter user sys identified by \"$ORACLE_PASSWORD\"\; | su -s /bin/bash oracle -c "$SQLPLUS -s / as sysdba" > /dev/null 2>&1
-    echo  alter user system identified by \"$ORACLE_PASSWORD\"\; | su -s /bin/bash oracle -c "$SQLPLUS -s / as sysdba" > /dev/null 2>&1
-    echo @$ORACLE_HOME/apex/apxxepwd.sql \"$ORACLE_PASSWORD\"\; | su -s /bin/bash oracle -c "$SQLPLUS -s / as sysdba" > /dev/null 2>&1
+    echo  alter user sys identified by \"${ORACLE_PASSWORD-manager}\"\; | su -s /bin/bash oracle -c "$SQLPLUS -s / as sysdba" > /dev/null 2>&1
+    echo  alter user system identified by \"${ORACLE_PASSWORD-manager}\"\; | su -s /bin/bash oracle -c "$SQLPLUS -s / as sysdba" > /dev/null 2>&1
+    echo @$ORACLE_HOME/apex/apxxepwd.sql \"${ORACLE_PASSWORD-manager}\"\; | su -s /bin/bash oracle -c "$SQLPLUS -s / as sysdba" > /dev/null 2>&1
     chmod 750 /u01/app/oracle/oradata
     chmod -R 775 /u01/app/oracle/diag
     echo "XE:$ORACLE_HOME:N" >> /etc/oratab
