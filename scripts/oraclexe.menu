@@ -1,0 +1,25 @@
+    <!-- Oracle XE -->
+    <Menu>
+       <Name>Oracle Database 11g Express Edition</Name>
+       <Directory>oraclexe-11g.directory</Directory>
+       <NotDeleted/>
+       <Include>
+        <Filename>oraclexe-startdb.desktop</Filename>
+        <Filename>oraclexe-stopdb.desktop</Filename>
+        <Filename>oraclexe-runsql.desktop</Filename>
+        <Filename>oraclexe-backup.desktop</Filename>
+        <Filename>oraclexe-getstarted.desktop</Filename>
+        <Filename>oraclexe-restore.desktop</Filename>
+       </Include>
+      <Menu>
+	    <Name>Get Help</Name>
+	    <Directory>oraclexe-gethelp.directory</Directory>
+	    <NotDeleted/>
+	    <Include>
+	     <Filename>oraclexe-registerforonlineforum.desktop</Filename>
+	     <Filename>oraclexe-gotoonlineforum.desktop</Filename>
+	     <Filename>oraclexe-readdocumentation.desktop</Filename>
+	    </Include>
+      </Menu>
+    </Menu>
+    <!-- End of Oracle XE -->

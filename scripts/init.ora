@@ -15,9 +15,9 @@ db_name=XE
 ###########################################
 # File Configuration
 ###########################################
-control_files=("/u01/app/oracle/oradata/XE/control.dbf")
-DB_RECOVERY_FILE_DEST=/u01/app/oracle/fast_recovery_area
-DB_RECOVERY_FILE_DEST_SIZE=10G
+control_files=("/var/lib/oracle/oradata/XE/control.dbf")
+DB_RECOVERY_FILE_DEST=/var/lib/oracle/fast_recovery_area
+DB_RECOVERY_FILE_DEST_SIZE=1G
 
 ###########################################
 # Job Queues
@@ -28,7 +28,7 @@ job_queue_processes=4
 # Miscellaneous
 ###########################################
 compatible=11.2.0.0.0
-diagnostic_dest=/u01/app/oracle
+diagnostic_dest=/var/lib/oracle
 #memory_target=1073741824
 #memory_target=1073741824
 pga_aggregate_target=200540160
@@ -43,7 +43,7 @@ sessions=20
 ###########################################
 # Security and Auditing
 ###########################################
-audit_file_dest=/u01/app/oracle/admin/XE/adump
+audit_file_dest=/var/lib/oracle/admin/XE/adump
 remote_login_passwordfile=EXCLUSIVE
 
 ###########################################

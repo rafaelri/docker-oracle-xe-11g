@@ -3,28 +3,13 @@ if [ "$1" = 'oracle-xe' ]; then
   if [ ! -d "$DATADIR/oradata" ]; then
     echo "Setting up Oracle"
 
-    mkdir -p $DATADIR/admin \
-    && mkdir -p $DATADIR/product/11.2.0/xe/ \
-    && mkdir -p $DATADIR/product/11.2.0/xe/log/diag/clients \
-    && mkdir $DATADIR/product/11.2.0/xe/network \
-  	&& mkdir -p $DATADIR/diag \
-  	&& mkdir -p $DATADIR/fast_recovery_area \
-  	&& mkdir -p $DATADIR/oradata \
-  	&& mkdir -p $DATADIR/oradiag_oracle \
-    && cp -r $HOME_TEMPLATEDIR/config $HOME_DATADIR/config \
-    && cp -r $HOME_TEMPLATEDIR/dbs $HOME_DATADIR/dbs  \
-    && cp -r $HOME_TEMPLATEDIR/network/admin $HOME_DATADIR/network/admin \
-    && chown -R oracle:dba /var/lib/oracle
-
-    su -s /bin/bash oracle -c "$ORACLE_HOME/config/scripts/XE.sh"
-    echo  alter user sys identified by \"${ORACLE_PASSWORD-manager}\"\; | su -s /bin/bash oracle -c "$SQLPLUS -s / as sysdba" > /dev/null 2>&1
-    echo  alter user system identified by \"${ORACLE_PASSWORD-manager}\"\; | su -s /bin/bash oracle -c "$SQLPLUS -s / as sysdba" > /dev/null 2>&1
-    echo @$ORACLE_HOME/apex/apxxepwd.sql \"${ORACLE_PASSWORD-manager}\"\; | su -s /bin/bash oracle -c "$SQLPLUS -s / as sysdba" > /dev/null 2>&1
-    chmod 750 /u01/app/oracle/oradata
-    chmod -R 775 /u01/app/oracle/diag
-    echo "XE:$ORACLE_HOME:N" >> /etc/oratab
-    chown oracle:dba /etc/oratab
-    chmod 664 /etc/oratab
+    echo "ORACLE_LISTENER_PORT=1521" > /tmp/XE.rsp
+    echo "ORACLE_HTTP_PORT=8080" >> /tmp/XE.rsp
+    echo "ORACLE_PASSWORD=${ORACLE_PASSWORD-manager}" >> /tmp/XE.rsp
+    echo "ORACLE_CONFIRM_PASSWORD=${ORACLE_PASSWORD-manager}" >> /tmp/XE.rsp
+    echo "ORACLE_DBENABLE=y" >> /tmp/XE.rsp
+    /etc/init.d/oracle-xe configure responseFile=/tmp/XE.rsp
+    su -s /bin/bash oracle -c "cp $ORACLE_HOME/dbs/spfileXE.ora $DATADIR/spfileXE.ora"
 
     for f in /docker-entrypoint-initdb.d/*; do
   			case "$f" in
@@ -37,8 +22,16 @@ if [ "$1" = 'oracle-xe' ]; then
   		done
   fi
   echo "Starting Oracle"
-  cat $TEMPLATE_LISTENERS_ORA | sed "s/%hostname%/$HOSTNAME/g" | sed "s/%port%/1521/g" > $LISTENERS_ORA
-  service oracle-xe start
+  cp /post-setup/etc-oratab /etc/oratab
+  cp /post-setup/etc-default-oracle-xe /etc/default/oracle-xe
+  mkdir -p /u01/app/oracle/product/11.2.0/xe/log/diag/clients
+  chown -R oracle:dba /u01/app/oracle/product/11.2.0/xe/log
+  sed -i "s/%hostname%/$HOSTNAME/g" $LISTENERS_ORA
+  sed -i "s/%port%/1521/g" $LISTENERS_ORA
+  sed -i "s/%hostname%/$HOSTNAME/g" /u01/app/oracle/product/11.2.0/xe/network/admin/tnsnames.ora
+  sed -i "s/%port%/1521/g" /u01/app/oracle/product/11.2.0/xe/network/admin/tnsnames.ora
+  su -s /bin/bash oracle -c "cp $DATADIR/spfileXE.ora $ORACLE_HOME/dbs/spfileXE.ora"
+  /etc/init.d/oracle-xe start
   tail -f `find /u01 -name listener.log` &
   PIDTAIL="$!"
   trap "echo 'Stopping Oracle' && service oracle-xe stop && kill $PIDTAIL" exit INT TERM

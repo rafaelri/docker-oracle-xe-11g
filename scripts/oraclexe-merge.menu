@@ -1,0 +1,7 @@
+    <!-- Oracle XE -->
+    <Menu>
+      <Name>OracleXE</Name>
+      <MergeFile>oraclexe.menu</MergeFile>
+    </Menu>
+    <!-- End of Oracle XE -->
+
