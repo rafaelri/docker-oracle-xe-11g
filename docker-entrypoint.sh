@@ -9,7 +9,6 @@ if [ "$1" = 'oracle-xe' ]; then
     echo "ORACLE_CONFIRM_PASSWORD=${ORACLE_PASSWORD-manager}" >> /tmp/XE.rsp
     echo "ORACLE_DBENABLE=y" >> /tmp/XE.rsp
     /etc/init.d/oracle-xe configure responseFile=/tmp/XE.rsp
-    su -s /bin/bash oracle -c "cp $ORACLE_HOME/dbs/spfileXE.ora $DATADIR/spfileXE.ora"
 
     for f in /docker-entrypoint-initdb.d/*; do
   			case "$f" in
@@ -30,7 +29,6 @@ if [ "$1" = 'oracle-xe' ]; then
   sed -i "s/%port%/1521/g" $LISTENERS_ORA
   sed -i "s/%hostname%/$HOSTNAME/g" /u01/app/oracle/product/11.2.0/xe/network/admin/tnsnames.ora
   sed -i "s/%port%/1521/g" /u01/app/oracle/product/11.2.0/xe/network/admin/tnsnames.ora
-  su -s /bin/bash oracle -c "cp $DATADIR/spfileXE.ora $ORACLE_HOME/dbs/spfileXE.ora"
   /etc/init.d/oracle-xe start
   tail -f `find /u01 -name listener.log` &
   PIDTAIL="$!"
