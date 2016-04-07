@@ -3,6 +3,7 @@ if [ "$1" = 'oracle-xe' ]; then
   if [ ! -d "$DATADIR/oradata" ]; then
     echo "Setting up Oracle"
 
+    chown -r oracle:dba /var/lib/oracle
     echo "ORACLE_LISTENER_PORT=1521" > /tmp/XE.rsp
     echo "ORACLE_HTTP_PORT=8080" >> /tmp/XE.rsp
     echo "ORACLE_PASSWORD=${ORACLE_PASSWORD-manager}" >> /tmp/XE.rsp
